@@ -1,0 +1,42 @@
+# Go binary and object files
+*.exe
+*.out
+*.o
+*.a
+
+# Compiled Go packages
+*.pkg
+
+# The go build directory
+/build/
+
+# Docker
+.DS_Store
+.dockerignore
+.docker/
+
+# Logs
+*.log
+
+# Binary files
+*.dat
+*.bin
+
+# Temporary files
+*.tmp
+*.bak
+
+# Dependency directories
+/vendor/
+
+# Compiled binary
+/server
+
+# IDE specific files (VSCode, IntelliJ, etc.)
+.idea/
+.vscode/
+*.iml
+
+# System and backup files
+Thumbs.db
+.DS_Store
