@@ -6,32 +6,46 @@ import (
 	"log"
 	"net"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 func handleConnection(conn net.Conn, verbose bool) {
 	defer conn.Close()
 
-	buffer := make([]byte, 1024)
-	_, err := conn.Read(buffer)
-	if err != nil {
-		log.Println("Error reading:", err)
-		return
-	}
+	var lastPacketTime time.Time
 
-	log.Printf("Received data: %s\n", string(buffer))
+	for {
+		buffer := make([]byte, 1024)
+		_, err := conn.Read(buffer)
+		if err != nil {
+			log.Println("Error reading:", err)
+			break
+		}
 
-	if verbose {
-		log.Printf("Connection established at %s\n", time.Now().Format("2006-01-02 15:04:05"))
+		currentTime := time.Now()
+		duration := currentTime.Sub(lastPacketTime)
+
+		receivedMessage := string(buffer)
+
+		if verbose {
+			log.Printf("Received data: %s\n", color.GreenString(receivedMessage))
+			log.Printf(color.New(color.FgHiBlack).Sprintf("Duration since last packet: %s\n", duration.String()))
+		} else {
+			log.Printf("Received data: %s\n", receivedMessage)
+		}
+
+		lastPacketTime = currentTime
 	}
 }
 
 func main() {
 	port := flag.Int("port", 8080, "TCP port to listen on")
-	verbose := flag.Bool("v", false, "Enable verbose logging")
+	verbose := flag.Bool("v", true, "Enable verbose logging")
 	flag.Parse()
 
 	if *verbose {
-		log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+		log.SetFlags(log.Lmicroseconds)
 		log.Println("Verbose logging enabled.")
 	}
 
@@ -41,7 +55,7 @@ func main() {
 	}
 
 	defer listener.Close()
-	log.Printf("Server listening on :%d\n", *port)
+	log.Printf(color.New(color.FgHiBlack).Sprintf("Server listening on :%d\n", *port))
 
 	for {
 		conn, err := listener.Accept()
