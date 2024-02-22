@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"log"
@@ -17,7 +18,7 @@ func handleConnection(conn net.Conn, verbose bool) {
 
 	for {
 		buffer := make([]byte, 1024)
-		_, err := conn.Read(buffer)
+		n, err := conn.Read(buffer)
 		if err != nil {
 			log.Println("Error reading:", err)
 			break
@@ -26,18 +27,22 @@ func handleConnection(conn net.Conn, verbose bool) {
 		currentTime := time.Now()
 		duration := currentTime.Sub(lastPacketTime)
 
-		receivedMessage := string(buffer)
+		receivedHex := hex.EncodeToString(buffer[:n])
 
 		if verbose {
-			log.Printf("Received data: %s\n", color.GreenString(receivedMessage))
+			log.Printf("Received data (string): %s\n", buffer[:n])
+			log.Printf("Received data (bytes): %v\n", buffer[:n])
+			log.Printf("Received data (hex): %s\n", receivedHex)
 			log.Printf(color.New(color.FgHiBlack).Sprintf("Duration since last packet: %s\n", duration.String()))
 		} else {
-			log.Printf("Received data: %s\n", receivedMessage)
+			log.Printf("Received data: %s\n", receivedHex)
 		}
 
 		lastPacketTime = currentTime
 	}
 }
+
+
 
 func main() {
 	port := flag.Int("port", 8080, "TCP port to listen on")
